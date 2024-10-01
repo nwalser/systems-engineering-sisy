@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 
+f_decimal = '{0:.2f}'
 data = np.genfromtxt('3c_data.csv', delimiter=',', skip_header=True)
 
 t = data[:, 0]
@@ -25,27 +26,49 @@ print(f"Min Position: {angle[angle_min_index]}")
 print(f"Min Position Velocity: {velocity[angle_min_index]}")
 print(f"Min Position Acceleration: {acceleration[angle_min_index]}")
 
-
 # plot
-plt.figure(1, figsize=(12, 8))
+plt.figure(1)
 
 # angle acceleration
 plt.subplot(3, 1, 1)
+plt.title("IMU Smartphone Signal (90° Turn)")
 plt.plot(t, acceleration)
 plt.grid(True)
+ax = plt.gca()
+ax.set_xticklabels([])
 plt.ylabel('Acceleration [°/s^2]')
+plt.vlines([angle_max_index/f, angle_min_index/f], ymin=-3, ymax=3, color="k", linestyle='--')
+plt.text(x=4, y=0.5, s=f"Accel. \n"
+                       f"{f_decimal.format(acceleration[angle_min_index])}°/s^2 \n"
+                       f"{f_decimal.format(acceleration[angle_max_index])}°/s^2")
+
 
 # angle velocity
 plt.subplot(3, 1, 2)
 plt.plot(t, velocity)
 plt.grid(True)
+ax = plt.gca()
+ax.set_xticklabels([])
 plt.ylabel('Velocity [°/s]')
+plt.vlines([angle_max_index/f, angle_min_index/f], ymin=0, ymax=70, color="k", linestyle='--')
+plt.text(x=4, y=40, s=f"Vel: \n"
+                       f"{f_decimal.format(velocity[angle_min_index])}°/s \n"
+                       f"{f_decimal.format(velocity[angle_max_index])}°/s")
 
 # angle position
 plt.subplot(3, 1, 3)
 plt.plot(t, angle)
 plt.grid(True)
-plt.xlabel('Time [s]')
+ax = plt.gca()
 plt.ylabel('Angle [°]')
+plt.xlabel('Time [s]')
+plt.vlines([angle_max_index/f, angle_min_index/f], ymin=-5, ymax=90, color="k", linestyle='--')
+plt.text(x=4, y=30, s=f"Angle: \n"
+                         f"{f_decimal.format(angle[angle_min_index])}° \n"
+                         f"{f_decimal.format(angle[angle_max_index])}°")
+
+plt.text(x=0.2, y=30, s=f"\n"
+                       f"t Max: {f_decimal.format(angle_max_index/f)}s \n"
+                       f"t Min: {f_decimal.format(angle_min_index/f)}s")
 
 plt.show()
