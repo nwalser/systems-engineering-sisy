@@ -4,12 +4,12 @@ from scipy.io import wavfile
 from scipy.signal.windows import hamming, hann
 
 # read signal
-fs, s = wavfile.read('aufgabe_4.wav')  # fs sampling frequency, s signal
+fs, s = wavfile.read('aufgabe_3.wav')  # fs sampling frequency, s signal
 s = s/32768  # normalize signal
 
 # only take part of signal for fft
 t = np.arange(0, len(s))/fs
-time_filter = np.where((t >= 0) & (t <= 0.08))
+time_filter = np.where((t >= 0) & (t <= 1))
 t = t[time_filter]
 s = s[time_filter]
 
@@ -39,18 +39,20 @@ for i in range(0, 3):  # approximate to 2 coefficients
 
 # inpulse response
 tau = 0.0016
-h = Ts / tau * np.exp(-t / tau)  # example response
+h = np.ones(2); h[1] = -1  # example response
 s_out = np.convolve(h, s)[0:len(s)]
 
 # plot all results
 fft_filter = np.where((0 <= fft_frequencies) & (fft_frequencies <= 5000))
 
 # plot signal
-plt.plot(t, s)
+plt.plot(t, s, label="Signal")
+plt.plot(t, s_out, label="Signal out")
 plt.grid(True)
 plt.xlabel('t / s')
 plt.ylabel('s(t)')
 plt.title('Signal')
+plt.legend()
 plt.show()
 
 # plot signal windowed

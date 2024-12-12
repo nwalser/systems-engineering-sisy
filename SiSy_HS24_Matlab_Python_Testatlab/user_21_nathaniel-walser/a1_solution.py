@@ -4,12 +4,12 @@ from scipy.io import wavfile
 from scipy.signal.windows import hamming, hann
 
 # read signal
-fs, s = wavfile.read('aufgabe_4.wav')  # fs sampling frequency, s signal
+fs, s = wavfile.read('aufgabe_1.wav')  # fs sampling frequency, s signal
 s = s/32768  # normalize signal
 
 # only take part of signal for fft
 t = np.arange(0, len(s))/fs
-time_filter = np.where((t >= 0) & (t <= 0.08))
+time_filter = np.where((t >= 0) & (t <= 0.03))
 t = t[time_filter]
 s = s[time_filter]
 
@@ -19,10 +19,12 @@ power = 1 / len(s) * np.sum(np.pow(s, 2))  # median power
 rms = np.sqrt(1 / len(s) * np.sum(np.pow(s, 2)))  # rms
 peak = np.max(s)
 
+print(f"T0: {0.03}s")
+print(f"f0: {1/0.03}Hz")
+print(f"Ts: {Ts}s")
+
 # fft
 window = np.ones_like(s)  # no window
-# window = hann(len(s))
-# window = hamming(len(s)),
 windowed = s * window
 
 fft_result = np.fft.fft(windowed) / len(windowed)
@@ -31,16 +33,13 @@ fft_frequencies = np.fft.fftfreq(len(windowed), 1 / fs)
 A_k = 2 * np.real(fft_result)  # cos coefficients
 B_k = -2 * np.imag(fft_result)  # sin coefficients
 
-# approximate signal
-s_app = np.zeros_like(s)
-for i in range(0, 3):  # approximate to 2 coefficients
-    s_app += A_k[i] * np.cos(2*np.pi*t*fft_frequencies[i])
-    s_app += B_k[i] * np.sin(2*np.pi*t*fft_frequencies[i])
+print(f"A_k0: {A_k[0]}s")
+print(f"A_k1: {A_k[1]}s")
 
-# inpulse response
-tau = 0.0016
-h = Ts / tau * np.exp(-t / tau)  # example response
-s_out = np.convolve(h, s)[0:len(s)]
+# approximate signal
+f0 = 33.33
+s_app = A_k[0] + A_k[1] * np.cos(2*np.pi*t*f0)
+
 
 # plot all results
 fft_filter = np.where((0 <= fft_frequencies) & (fft_frequencies <= 5000))
@@ -67,34 +66,10 @@ plt.xlabel('t / s')
 plt.ylabel('s(t)')
 plt.show()
 
-# plot signal out
-plt.plot(t, s_out)
-plt.grid(True)
-plt.xlabel('t / s')
-plt.ylabel('s(t)')
-plt.title('Signal Out')
-plt.show()
-
 # plot spectrum
 plt.stem(fft_frequencies[fft_filter], np.abs(fft_result[fft_filter]), linefmt='C1-', markerfmt='C1o', basefmt=" ")
 plt.xlabel('Frequenz / Hz')
 plt.ylabel('abs(X)')
-plt.title('Spektrum')
-plt.grid()
-plt.show()
-
-# plot spectrum
-plt.plot(fft_frequencies[fft_filter], 20 * np.log10(np.abs(fft_result[fft_filter])), marker='o')
-plt.xlabel('Frequenz / Hz')
-plt.ylabel('abs(X) / dB')
-plt.title('Spektrum')
-plt.grid()
-plt.show()
-
-# plot angle
-plt.stem(fft_frequencies[fft_filter], np.angle(fft_result[fft_filter]), linefmt='C1-', markerfmt='C1o', basefmt=" ")
-plt.xlabel('Frequenz / Hz')
-plt.ylabel('angle(X) / rad')
 plt.title('Spektrum')
 plt.grid()
 plt.show()
@@ -109,7 +84,7 @@ plt.grid()
 plt.show()
 
 # plot approximated signal
-plt.plot(t, s_app)
+plt.plot(t, s, t, s_app)
 plt.grid(True)
 plt.xlabel('t / s')
 plt.ylabel('s(t)')
